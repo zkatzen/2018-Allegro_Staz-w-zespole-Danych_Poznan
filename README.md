@@ -22,7 +22,7 @@ If you want the program to download the files for you, you need to specify how m
 ```
 $ sbt "run 2"
 ```
-As a default, the program runs locally using one thread but you can change it using SPARK_MASTER command for example:
+As a default, the program runs locally using one thread but you can change it using SPARK_MASTER environment variable, for example:
 ```
 $ SPARK_MASTER='local[2]' sbt "run 3"
 ```
