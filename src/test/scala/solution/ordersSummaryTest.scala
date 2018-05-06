@@ -1,11 +1,11 @@
-package rozwiazanie
+package solution
 
 import java.io.{File, PrintWriter}
 
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{BeforeAndAfterEach, FunSuite, Outcome}
 
-class zamowieniaPodsumowanieTest extends FunSuite with BeforeAndAfterEach {
+class ordersSummaryTest extends FunSuite with BeforeAndAfterEach {
 
   var sparkSession : SparkSession = _
   override def beforeEach() {
@@ -24,14 +24,14 @@ class zamowieniaPodsumowanieTest extends FunSuite with BeforeAndAfterEach {
     pw.write("col1,col2,col3\nt1,t2,t3")
     pw.close()
 
-    val testDf = zamowieniaPodsumowanie.getDataFromFile("test.csv")
+    val testDf = ordersSummary.getDataFromFile("test.csv")
     assert(testDf.isSuccess)
 
     file.delete()
   }
 
   test("testGetDataFromFileFail") {
-    val testDf = zamowieniaPodsumowanie.getDataFromFile("test.csv")
+    val testDf = ordersSummary.getDataFromFile("test.csv")
     assert(testDf.isFailure)
   }
 

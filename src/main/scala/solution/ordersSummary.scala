@@ -1,17 +1,17 @@
-package rozwiazanie
+package solution
 
 import java.io.File
 import java.net.URL
-
 import com.typesafe.config.ConfigFactory
 import org.apache.spark.sql.{DataFrame, SparkSession}
-
 import scala.sys.process._
 import scala.util._
+import com.typesafe.scalalogging._
 
-object zamowieniaPodsumowanie{
+object ordersSummary {
 
   val sparkMaster = ConfigFactory.load.getString("spark.master")
+  val logger = Logger("zamowienia")
 
   val spark = SparkSession
     .builder()
@@ -21,17 +21,18 @@ object zamowieniaPodsumowanie{
 
 
   def fileDownloader(url: String, filename: String) = {
-    print("Downloading file " + filename + "...")
+    //print("Downloading file " + filename + "...")
+    logger.info("Downloading file " + filename + "...")
     new URL(url) #> new File("src/main/resources/"+filename) !!
 
-    println("done")
+    logger.info("File "+filename+" downloaded successfully")
   }
 
   def downloadFiles(noOfFiles: Int): Unit = {
     if(noOfFiles > 0) {
       val fileName = "TED_CN_"+(2006+noOfFiles-1).toString + ".csv"
       if((new java.io.File("src/main/resources/"+fileName).exists)) {
-        println("File " + fileName + " already exists")
+        logger.info("File " + fileName + " already exists")
       }
       else {
         val url = "http://data.europa.eu/euodp/repository/ec/dg-grow/mapps/TED_CN_"+(2007+noOfFiles-1).toString + ".csv"
@@ -50,11 +51,11 @@ object zamowieniaPodsumowanie{
       Success(df)
     } catch {
       case ex: org.apache.spark.sql.AnalysisException => {
-        println(s"""File $path not found""")
+        logger.error(s"""File $path not found""")
         Failure(ex)
       }
       case unknown: Exception => {
-        println(s"""Unknown exception: $unknown""")
+        logger.error(s"""Unknown exception: $unknown""")
         Failure(unknown)
       }
     }
@@ -62,11 +63,11 @@ object zamowieniaPodsumowanie{
 
   def main(args: Array[String]): Unit = {
     if(args.length > 0) {
-      println("The number of files that will be used to get data: " + args(0))
+      logger.info("The number of files that will be downloaded: " + args(0))
       downloadFiles(args(0).toInt)
     }
     else {
-      println("The number of files that will be used to get data: 1")
+      logger.info("The number of files that will be downloaded: 1")
       downloadFiles(1)
     }
     getDataFromFile("src/main/resources/countries_code.csv") match {
@@ -93,12 +94,12 @@ object zamowieniaPodsumowanie{
                 "ORDER BY COUNT DESC").show(100)
           }
           case Failure(ex) => {
-            println("Exception while geting data...closing programm...")
+            logger.error("Exception while geting data...closing programm...")
           }
         }
       }
       case Failure(ex) => {
-        println("File with country codes not found...closing programm...")
+        logger.error("File with country codes not found...closing programm...")
       }
     }
 
